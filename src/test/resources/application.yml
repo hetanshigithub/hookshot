@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    # In-memory H2 in PostgreSQL mode by default. CI also runs the whole suite against real Postgres
+    # by setting SPRING_DATASOURCE_URL / _USERNAME / _PASSWORD in the environment.
+    url: jdbc:h2:mem:hookshot;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+  mvc:
+    problemdetails:
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+hookshot:
+  api-key: ""
+  max-attempts: 3
+  base-delay: 5s
+  max-delay: 1h
+  allow-private-targets: true # tests deliver to a receiver on 127.0.0.1
+  worker:
+    enabled: false # tests drive the worker by hand via runOnce()
+    batch-size: 20
+    lease: 60s
+    http-timeout: 5s
