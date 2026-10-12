@@ -2,7 +2,7 @@
 
 **A reliable webhook delivery service**: the machinery behind "we'll POST to your URL when something happens", the way Stripe, GitHub and Shopify do it. Built with Spring Boot 3, Java 21 and PostgreSQL.
 
-![CI](https://github.com/YOUR_USERNAME/hookshot/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/hetanshigithub/hookshot/actions/workflows/ci.yml/badge.svg)
 
 Sending one HTTP request is easy. Sending it *reliably* is the hard part: receivers go down, networks drop, retries stampede, payloads get forged, and users point webhooks at your internal network. Hookshot is a small, focused implementation of the answers to those problems:
 
