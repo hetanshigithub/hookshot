@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: hookshot
+      POSTGRES_PASSWORD: hookshot
+      POSTGRES_DB: hookshot
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hookshot"]
+      interval: 5s
+      retries: 10
+
+  hookshot:
+    build: .
+    environment:
+      DATABASE_URL: jdbc:postgresql://db:5432/hookshot
+      DATABASE_USERNAME: hookshot
+      DATABASE_PASSWORD: hookshot
+      HOOKSHOT_API_KEY: ${HOOKSHOT_API_KEY:-}
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
