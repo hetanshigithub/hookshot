@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: hookshot
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/hookshot}
+    username: ${DATABASE_USERNAME:hookshot}
+    password: ${DATABASE_PASSWORD:hookshot}
+  mvc:
+    problemdetails:
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+hookshot:
+  # If set, every /api/** request must send a matching X-API-Key header.
+  api-key: ${HOOKSHOT_API_KEY:}
+  max-attempts: 8
+  base-delay: 5s
+  max-delay: 1h
+  # SSRF guard: keep false in production. Set true only for local demos.
+  allow-private-targets: ${HOOKSHOT_ALLOW_PRIVATE_TARGETS:false}
+  worker:
+    enabled: true
+    batch-size: 20
+    lease: 60s
+    http-timeout: 5s
