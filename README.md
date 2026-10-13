@@ -1,10 +1,14 @@
 # Hookshot
 
-**A reliable webhook delivery service**: the machinery behind "we'll POST to your URL when something happens", the way Stripe, GitHub and Shopify do it. Built with Spring Boot 3, Java 21 and PostgreSQL.
+A webhook delivery service I built to learn what it takes to make "we'll POST to your URL when something happens" actually reliable. Java 21, Spring Boot 3, PostgreSQL.
 
 ![CI](https://github.com/hetanshigithub/hookshot/actions/workflows/ci.yml/badge.svg)
 
-Sending one HTTP request is easy. Sending it *reliably* is the hard part: receivers go down, networks drop, retries stampede, payloads get forged, and users point webhooks at your internal network. Hookshot is a small, focused implementation of the answers to those problems:
+## Why I built this
+
+At Dbmares I wrote REST APIs that other systems called. I wanted to build the other side: the service that calls *out*, and has to cope when the other end is down. I chose webhooks over polling because they cut out unnecessary API calls and keep the system simpler and more efficient: a consumer hears about an event when it happens instead of asking over and over. That makes an integration event-driven and quicker to set up, so I wanted to build the delivery side myself.
+
+Sending one HTTP request is easy. Sending it *reliably* is the hard part: receivers go down, networks drop, retries stampede, payloads get forged, and users point webhooks at your internal network. Hookshot is my attempt at answering each of those:
 
 | Problem | How Hookshot handles it |
 |---|---|
@@ -121,6 +125,14 @@ To verify: compute `HMAC_SHA256(secret, t + "." + rawBody)`, compare it to `v1` 
 - **SSRF checks happen twice**: at registration and again right before sending, and redirects are never followed. Residual risk: DNS can change between the check and the connection (rebinding); pinning the resolved IP is on the roadmap.
 - **Plain SQL (`JdbcClient`) over JPA.** The queue's behavior *is* its SQL (locking, leases, ordering), so it stays explicit and reviewable.
 - **Injected `Clock`.** All time comes from a `Clock` bean, so tests move time forward to exercise multi-hour backoff schedules instantly.
+
+## What went wrong along the way
+
+Mistakes I made and fixed, kept here on purpose:
+
+- **I committed `__pycache__`.** Running my demo receiver while testing left bytecode in the first commit. I removed it and added it to `.gitignore`.
+- **The demo script broke on macOS system Python.** `float | None` in `demo_receiver.py` needs Python 3.10+, and macOS ships 3.9. Adding `from __future__ import annotations` fixed it.
+- **The Docker healthcheck was fragile.** It called `curl`, which the slim JRE image may not include. I removed it and left a comment pointing to `/actuator/health`; a proper fix is a healthcheck that doesn't depend on extra binaries.
 
 ## Testing
 
